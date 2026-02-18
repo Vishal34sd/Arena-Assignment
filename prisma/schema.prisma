@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  arenasCreated Arena[]            @relation("ArenaCreator")
+  arenas        ArenaParticipant[]
+
+  createdAt DateTime @default(now())
+}
+
+model Arena {
+  id          String @id @default(uuid())
+  title       String
+  description String
+
+  createdBy String
+  creator   User   @relation("ArenaCreator", fields: [createdBy], references: [id])
+
+  participants ArenaParticipant[]
+  createdAt    DateTime           @default(now())
+}
+
+model ArenaParticipant {
+  id      String @id @default(uuid())
+  userId  String
+  arenaId String
+
+  user  User  @relation(fields: [userId], references: [id])
+  arena Arena @relation(fields: [arenaId], references: [id])
+
+  @@unique([userId, arenaId])
+}
